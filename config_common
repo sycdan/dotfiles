@@ -18,6 +18,25 @@
 	co = checkout
   cor = "!f() { git fetch origin && git checkout origin/$1; }; f"
 	cob = checkout -b
+  # Check out a remote branch in a detached state
+  cod = "!f() { \
+    matches=$(git ls-remote --heads origin | sed 's|^.*refs/heads/||' | grep \"$1\"); \
+    if [ -z \"$matches\" ]; then \
+      echo \"No remote branches found containing: $1\"; \
+      exit 1; \
+    fi; \
+    count=$(echo \"$matches\" | wc -l); \
+    if [ \"$count\" -eq 1 ]; then \
+      branch=\"$matches\"; \
+    else \
+      branch=$(echo \"$matches\" | pick); \
+    fi; \
+		if [ -z \"$branch\" ]; then \
+			echo \"No branch selected.\"; \
+			exit 1; \
+		fi; \
+    git fetch origin \"$branch\" && git checkout FETCH_HEAD; \
+  }; f"
 	desc = describe
 	# fixup the last commit
 	f = rebase --interactive HEAD~2
