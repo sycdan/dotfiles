@@ -1,0 +1,5 @@
+[include]
+	path = ~/.config/git/config_common
+
+[user]
+	email = dstace@domain.com

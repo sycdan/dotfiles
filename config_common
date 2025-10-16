@@ -8,16 +8,28 @@
 	aa = add --all
 	ad = add
 	ass = add
-	b = branch
+  # interactive branch switcher
+	brco = "!f() { git branch | pick | xargs git co; }; f"
+	# delete current branch after checking out main
+	brdel = "!f() { B=$(git brname); git co main; git branch -D $B; }; f"
 	brname = rev-parse --abbrev-ref HEAD
 	ca = commit --amend
 	cm = commit -m
 	co = checkout
+  cor = "!f() { git fetch origin && git checkout origin/$1; }; f"
 	cob = checkout -b
 	desc = describe
 	# fixup the last commit
 	f = rebase --interactive HEAD~2
-	fp = push --force-with-lease
+	af = "!f() { \
+		base=$(git log --pretty=format:'%H %s' | awk '/^.* f$/{next} {print $1; exit}'); \
+		if [ -z \"$base\" ]; then echo 'No base commit found.'; exit 1; fi; \
+		echo "Autofixuping onto $base"; \
+		GIT_SEQUENCE_EDITOR=\"sed -i 's/^pick \\([0-9a-f]*\\) f$/fixup \\1 f/'\" \
+		git rebase -i $base^; \
+	}; f"
+  fp = "push --force-with-lease"
+  fpx = "!f() { B=$(git brname); if [ \"$B\" = \"main\" ]; then git push --force-with-lease; else git push origin --delete $B; git push origin $B; fi; }; f"
 	git = !exec git
 	l = log --oneline
 	ls = ls-files
@@ -29,9 +41,10 @@
 	# progress it will be "rebase" and if a specific commit has been checked out,
 	# it will display the result of git describe.
 	repo = "!f() { branch=$(git brname 2> /dev/null); if [ -n \"$branch\" ] ; then if [ \"$branch\" = \"HEAD\" ] ; then if git status | grep 'rebase in progress' > /dev/null ; then branch='rebase'; else branch=$(git describe --always); fi; fi; echo $(basename $(git rev-parse --show-toplevel)):$branch; else exit 1; fi; }; f"
-	rbc = rebase --continue
+	rba = rebase --abort
+  rbc = rebase --continue
 	rbi = rebase --interactive
-	rbir = rebase --interactive --root
+	rbr = rebase --interactive --root
 	s = status -s
 
 	# Eric's magical commands
@@ -217,7 +230,7 @@
 	safecrlf = false
 	editor = code --wait
 	hooksPath = ~/.config/git/hooks
-	excludesfile = ~/.config/git/.gitignore_global
+	excludesfile = ~/.config/git/ignore_global
 
 [remote "origin"]
 	prune = true

@@ -11,7 +11,7 @@ git clone https://github.com/sycdan/config-git.git ~/.config/git
 Copy the config template file in your home folder:
 
 ```bash
-cp ~/.config/git/.gitconfig.identity-template ~/.gitconfig
+cp ~/.config/git/config_identity-template ~/.gitconfig
 ```
 
 And set the email applicable to this domain.
