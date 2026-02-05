@@ -18,7 +18,16 @@
 	co = checkout
   cor = "!f() { git fetch origin && git checkout origin/$1; }; f"
 	cob = checkout -b
-  # Check out a remote branch in a detached state
+  # Interactive checkout
+  coi = "!f() { \
+    branch=$(git branch | grep -v '*' | sed 's/^..//' | pick -q \"$1\"); \
+    if [ -z \"$branch\" ]; then \
+      echo \"No branch selected.\"; \
+      exit 1; \
+    fi; \
+    git switch \"$branch\"; \
+  }; f"
+  # Detached interactive checkout
   cod = "!f() { \
     matches=$(git ls-remote --heads origin | sed 's|^.*refs/heads/||' | grep \"$1\"); \
     if [ -z \"$matches\" ]; then \
