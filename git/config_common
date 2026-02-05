@@ -192,7 +192,7 @@
 # [core]
 #   editor = nvim
 #   pager = /usr/bin/less -+$LESS -FRX
-#   hookspath = ~/.config/git/hooks
+#   hookspath = ~/dotfiles/git/hooks
 
 # [diff]
 #   renames = true
@@ -248,8 +248,8 @@
 	autocrlf = false
 	safecrlf = false
 	editor = code --wait
-	hooksPath = ~/.config/git/hooks
-	excludesfile = ~/.config/git/ignore_global
+	# hooksPath = ~/dotfiles/git/hooks
+	excludesfile = ~/dotfiles/git/ignore_global
 
 [remote "origin"]
 	prune = true

@@ -1,0 +1,3 @@
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+cp "$SCRIPT_DIR"/git/config_identity-template ~/.gitconfig

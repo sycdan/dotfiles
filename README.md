@@ -5,13 +5,13 @@
 Clone to a central location:
 
 ```bash
-git clone https://github.com/sycdan/config-git.git ~/.config/git
+git clone https://github.com/sycdan/dotfiles.git ~/dotfiles
 ```
 
 Copy the config template file in your home folder:
 
 ```bash
-cp ~/.config/git/config_identity-template ~/.gitconfig
+cp ~/dotfiles/git/config_identity-template ~/.gitconfig
 ```
 
 And set the email applicable to this domain.
@@ -21,7 +21,7 @@ And set the email applicable to this domain.
 To register the hooks for all repos:
 
 ```bash
-git config --global core.hooksPath ~/.config/git/hooks
+git config --global core.hooksPath ~/dotfiles/git/hooks
 ```
 
 To register them for only one, run the same command just without the `--global` part, from within a repo folder.
@@ -29,7 +29,7 @@ To register them for only one, run the same command just without the `--global` 
 Make the scripts executable:
 
 ```bash
-chmod +x ~/.config/git/hooks/pre-commit
+chmod +x ~/dotfiles/git/hooks/pre-commit
 ```
 
 ## Formatting
