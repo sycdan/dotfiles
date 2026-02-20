@@ -1,5 +1,4 @@
 import logging
-import shlex
 import subprocess
 
 from wsl.find.command import Find
@@ -7,33 +6,29 @@ from wsl.list.command import List
 
 logger = logging.getLogger(__name__)
 
-_PATH = "export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+def _wsl(distro: str, *cmd: str, timeout: int = 10) -> subprocess.CompletedProcess:
+  return subprocess.run(
+    ["wsl", "-d", distro, "--", *cmd],
+    capture_output=True,
+    text=True,
+    timeout=timeout,
+  )
 
 
 def _distro_has_origin(distro: str, wsl_path: str) -> bool:
-  # Pass the script via stdin (bash -s) to avoid Windows command-line
-  # argument quoting: wsl.exe mangles $(...) substitutions in -c scripts.
-  # Use find | while (no process substitution) for portability.
-  script = f"""\
-{_PATH}
-find "$HOME/projects" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | while IFS= read -r d; do
-  git -C "$d" remote -v 2>/dev/null | grep -qF {shlex.quote(wsl_path)} && echo found && break
-done
-"""
   try:
-    result = subprocess.run(
-      ["wsl", "-d", distro, "--", "bash", "-s"],
-      input=script.encode("utf-8"),  # binary: avoids Windows \n→\r\n conversion
-      capture_output=True,
-      timeout=15,
-    )
-    stdout = result.stdout.decode("utf-8")
-    stderr = result.stderr.decode("utf-8")
-    logger.debug(f"{distro}: stdout={stdout.strip()!r} stderr={stderr.strip()!r}")
-    return stdout.strip() == "found"
+    home = _wsl(distro, "bash", "-c", "echo $HOME").stdout.strip()
+    if not home:
+      return False
+    dirs = _wsl(distro, "find", f"{home}/projects", "-maxdepth", "1", "-mindepth", "1", "-type", "d").stdout.splitlines()
+    for d in dirs:
+      remotes = _wsl(distro, "git", "-C", d, "remote", "-v").stdout
+      if wsl_path in remotes:
+        return True
   except Exception as e:
     logger.debug(f"{distro}: check failed: {e}")
-    return False
+  return False
 
 
 def handle(command: Find) -> Find.Result:

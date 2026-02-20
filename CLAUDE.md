@@ -73,9 +73,8 @@ All handlers use `logger = logging.getLogger(__name__)`. Scaf exposes log output
 - `wsl -l -q` outputs UTF-16 LE without BOM — decode with `utf-16-le`.
 - WSL drops extra positional args passed after `bash -c 'script'`, so embed dynamic values directly in the script using `shlex.quote()`.
 - MINGW (Git Bash) expands absolute POSIX paths (`/mnt/c/...`) to Windows paths at shell level. To avoid mangling, pass Windows paths (`C:/...`) through Python and convert inside WSL using `wslpath`.
-- Always export a full `PATH` in non-interactive bash scripts: `export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin` so that `git` and `wslpath` are found.
-- In `wsl/find`, the origin is a Windows path; `wsl/path/get` converts it to the WSL form first (outside the bash script), then the script checks all remotes via `git remote -v | grep -qF`.
-- **Avoid inner double quotes in bash scripts passed via Python subprocess.** Python's `subprocess.list2cmdline` escapes `"` as `\"`, which wsl.exe may not handle correctly, causing the script to be truncated or mis-parsed. Use `$HOME` instead of `~` and bare `$var` instead of `"$var"` where possible.
+- **Prefer proxied wsl calls over bash scripts in Python subprocess.** Passing bash scripts via `-c`/`-s` through Python subprocess on Windows causes subtle bugs: wsl.exe mangles `$(...)` substitutions, Python `text=True` converts `\n`→`\r\n` breaking bash parsing. Instead, chain direct commands: `["wsl", "-d", distro, "--", "find", ...]`. Each call costs ~80ms warm; for typical use (≤2 projects/distro) this is faster than one bash -s call.
+- In `wsl/find`, `wsl/path/get` converts the origin to a WSL path first, then per-distro checks use plain proxied calls: `bash -c 'echo $HOME'`, `find $HOME/projects`, `git -C <dir> remote -v`.
 
 ## Dotfiles
 
