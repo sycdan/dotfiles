@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from scaf.rules import values_must_fit
 
@@ -9,7 +8,9 @@ class Create:
   """Create a new WSL distro for a project via wsl --import."""
 
   name: str = field(doc="Distro name (typically the repo/project name)")
-  origin: str = field(default="", doc="Git remote URL to clone into ~/projects/<name> after import")
+  origin: str = field(
+    default="", doc="Git remote URL to clone into ~/projects/<name> after import"
+  )
   image: str = field(
     default="",
     doc="Path to the .tar image; auto-detects latest in C:/wsl-images/ if omitted",
