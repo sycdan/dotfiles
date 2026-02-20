@@ -1,14 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
 class Workon:
-  """Describe what the user is asking the domain to do, in imperative terms."""
-  # """Greet the world."""
-  # casual: bool = field(default=False, metadata={"help": "Skip formalities"})
-  # name: str = field(default="world", metadata={"help": "The name to greet"})
-
-  @dataclass
-  class Result:
-    """Define the shape of the value returned by Workon below."""
-    # success: bool = field(metadata={"help": "Indicates if the command was successful"})
+  """Start a dev environment for a project."""
