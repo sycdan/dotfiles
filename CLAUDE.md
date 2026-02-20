@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Keep this file up to date.** Whenever you add a new command, discover a new gotcha, or learn something non-obvious about this codebase, update CLAUDE.md so future sessions benefit from it.
+
 ## Running commands
 
 ```bash
@@ -61,7 +63,8 @@ All handlers use `logger = logging.getLogger(__name__)`. Scaf exposes log output
 
 **`wsl/`** — WSL distro management; install dirs live under `C:/wsl/<name>/`, images under `C:/wsl-images/*.tar`
 - `wsl/list` — list installed distros; returns `List.Result(distros=[...])`
-- `wsl/find <origin>` — find a distro whose `~/projects/*/` has any remote pointing to the given Windows path; returns `Find.Result(distro=...)`
+- `wsl/find <origin>` — find a distro whose `$HOME/projects/*/` has any remote pointing to the given Windows path; returns `Find.Result(distro=...)`
+- `wsl/path/get <win_path> [--distro DISTRO]` — convert a Windows path to its WSL equivalent via `wslpath`; returns `Get.Result(wsl_path=...)`; uses the default WSL distro if `--distro` is omitted (query, no side effects)
 - `wsl/create <name> [--origin WIN_PATH] [--image PATH]` — `wsl --import` then clones the Windows repo into `~/projects/<name>`; raises if distro already exists
 - `wsl/activate <name> [--project PROJECT]` — launch interactive shell; if `--project` given, starts in `~/projects/<project>`
 - `wsl/nuke <name> [--force]` — unregister distro and remove its install dir; prompts for confirmation unless `--force`
@@ -71,7 +74,8 @@ All handlers use `logger = logging.getLogger(__name__)`. Scaf exposes log output
 - WSL drops extra positional args passed after `bash -c 'script'`, so embed dynamic values directly in the script using `shlex.quote()`.
 - MINGW (Git Bash) expands absolute POSIX paths (`/mnt/c/...`) to Windows paths at shell level. To avoid mangling, pass Windows paths (`C:/...`) through Python and convert inside WSL using `wslpath`.
 - Always export a full `PATH` in non-interactive bash scripts: `export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin` so that `git` and `wslpath` are found.
-- In `wsl/find`, the origin is a Windows path; the bash script calls `wslpath` to get the WSL form, then checks all remotes via `git remote -v | grep -qF`.
+- In `wsl/find`, the origin is a Windows path; `wsl/path/get` converts it to the WSL form first (outside the bash script), then the script checks all remotes via `git remote -v | grep -qF`.
+- **Avoid inner double quotes in bash scripts passed via Python subprocess.** Python's `subprocess.list2cmdline` escapes `"` as `\"`, which wsl.exe may not handle correctly, causing the script to be truncated or mis-parsed. Use `$HOME` instead of `~` and bare `$var` instead of `"$var"` where possible.
 
 ## Dotfiles
 
