@@ -1,0 +1,82 @@
+################################################################################
+# Misc
+################################################################################
+.env*
+.s3cfg*
+switch-env.py
+.aws*
+.venv
+application-sycdan.properties
+application-local.properties
+/runserver
+/runserver-custom
+/runbuild
+/runtests
+/Pipfile
+/Pipfile.lock
+zappa_settings-dan.json
+appsettings.local.json
+appsettings.Development*.json
+package-lock.json
+log.txt
+/switchenv
+/shell
+launch.json
+/src/environments/environment.ts
+db*.json
+*.bak
+sync.ffs_db
+.rooignore
+scratch.py
+
+################################################################################
+# Compiled source
+################################################################################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pyc
+__pycache__
+
+################################################################################
+# Packages
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+################################################################################
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs
+*.log
+
+################################################################################
+# OS-generated files
+################################################################################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+################################################################################
+# App-generated Files
+################################################################################
+.zedstate
+.idea
+*._gs
+~*
+.vscode/*
+.vscode
+*.code-workspace
