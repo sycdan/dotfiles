@@ -1,18 +1,13 @@
 import logging
-from pathlib import Path
 
 from project.workon.command import Workon
+from project.workon.pick.command import Pick
 
 logger = logging.getLogger(__name__)
 
-ACTION_DIR = Path(__file__).parent
 
-
-def handle(command: Workon) -> Workon.Result:
+def handle(command: Workon) -> None:
   logger.debug(f"Handling {command=}")
-  logger.error(f"Logic for the Workon command must be defined in {ACTION_DIR.as_posix()}/{Path(__file__).name}")
-  # TODO
-  """
-   wsl --import projectname C:\wsl\projectname C:\wsl-images\ubuntu24_2026-02-19.tar
-  """
-  return Workon.Result()
+  result = Pick().execute()
+  if result.path:
+    print(result.path)
