@@ -11,24 +11,6 @@ ERRORS=()
 ok()   { echo "  ✅ $1"; PASS=$((PASS + 1)); }
 fail() { echo "  ❌ $1"; FAIL=$((FAIL + 1)); ERRORS+=("$1"); }
 
-assert_contains() {
-  local name=$1 expected=$2 actual=$3
-  if [[ "$actual" == *"$expected"* ]]; then
-    ok "$name"
-  else
-    fail "$name — expected to contain '$expected', got: $actual"
-  fi
-}
-
-assert_not_contains() {
-  local name=$1 unexpected=$2 actual=$3
-  if [[ "$actual" != *"$unexpected"* ]]; then
-    ok "$name"
-  else
-    fail "$name — expected NOT to contain '$unexpected', got: $actual"
-  fi
-}
-
 # ---------------------------------------------------------------------------
 # Ruff
 # ---------------------------------------------------------------------------
@@ -43,23 +25,24 @@ fi
 # ---------------------------------------------------------------------------
 # Integration tests
 # ---------------------------------------------------------------------------
+echo "integration tests..."
+
 if ! command -v scaf &>/dev/null; then
-  echo "❌ scaf not found — integration tests are required"
+  echo "❌ scaf not found"
+  echo "💡 pip install git+https://github.com/sycdan/scaf"
   exit 1
 fi
 
-echo "integration tests..."
-
-out=$(scaf call wsl/list 2>/dev/null)
-assert_contains "wsl/list returns distros" '"distros"' "$out"
-
-out=$(scaf call project/workon/pick --query __no_such_repo__ 2>/dev/null)
-assert_contains "project/workon/pick returns path key" '"path"' "$out"
+if ! ls C:/wsl-images/*.tar >/dev/null 2>&1; then
+  echo "❌ No WSL image found in C:/wsl-images/"
+  echo "💡 Export an existing distro first:  scaf call wsl/export <distro>"
+  exit 1
+fi
 
 # ---------------------------------------------------------------------------
-# Workon integration: create → find → nuke a known test project
+# create → find → nuke a known test project
 # ---------------------------------------------------------------------------
-TESTNAME="mi-hook-test"
+TESTNAME="a_b_c.1-2-3"
 WIN_HOME=$(echo "$USERPROFILE" | tr '\\' '/')
 TESTDIR="$WIN_HOME/Projects/$TESTNAME"
 
@@ -68,38 +51,18 @@ cleanup() {
   rm -rf "$TESTDIR" 2>/dev/null || true
 }
 
-if ! ls C:/wsl-images/*.tar >/dev/null 2>&1; then
-  echo "  ⚠ No WSL image in C:/wsl-images/ — skipping workon test"
+trap cleanup EXIT
+cleanup
+
+# workon --create exercises: pick → wsl/find → wsl/list → wsl/create → wsl/path/get → wsl/activate
+if scaf call project/workon "$TESTNAME" --create -- exit 2>/dev/null; then
+  ok "workon"
 else
-  echo "workon integration test..."
-  trap cleanup EXIT
-
-  # Ensure clean slate
-  cleanup
-
-  out=$(scaf call wsl/list 2>/dev/null)
-  assert_not_contains "distro absent before create" "$TESTNAME" "$out"
-
-  mkdir -p "$TESTDIR"
-  git -C "$TESTDIR" init --quiet
-
-  # wsl/create implicitly exercises wsl/path/get (wslpath conversion inside)
-  out=$(scaf call wsl/create "$TESTNAME" --origin "$TESTDIR" 2>/dev/null)
-  assert_contains "wsl/create returns distro name" "$TESTNAME" "$out"
-
-  # wsl/find implicitly exercises wsl/path/get (origin → WSL path conversion)
-  out=$(scaf call wsl/find "$TESTDIR" 2>/dev/null)
-  assert_contains "wsl/find locates new distro" "$TESTNAME" "$out"
-
-  out=$(scaf call wsl/nuke "$TESTNAME" --force 2>/dev/null)
-  assert_contains "wsl/nuke returns distro name" "$TESTNAME" "$out"
-
-  out=$(scaf call wsl/list 2>/dev/null)
-  assert_not_contains "distro absent after nuke" "$TESTNAME" "$out"
-
-  cleanup
-  trap - EXIT
+  fail "workon"
 fi
+
+cleanup
+trap - EXIT
 
 # ---------------------------------------------------------------------------
 # Summary

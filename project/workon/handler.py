@@ -14,20 +14,17 @@ logger = logging.getLogger(__name__)
 PROJECTS_DIR = Path.home() / "Projects"
 
 
-def handle(command: Workon, name: str = "", *wsl_args: str) -> None:
-  logger.debug(f"Handling {command=} {name=}")
+def handle(command: Workon, *wsl_args: str) -> None:
+  logger.debug(f"Handling {command=}")
 
-  pick_result = Pick(query=name).execute()
-
+  pick_result = Pick(query=command.name).execute()
   if not pick_result.path:
-    if not name:
-      logger.debug("No repo selected")
-      return
     if not command.create:
-      raise ValueError(f"No repos match {name!r}")
-    new_repo = PROJECTS_DIR / name
+      raise RuntimeError(f"No repos match {command.name!r}")
+
+    new_repo = PROJECTS_DIR / command.name
     logger.info(f"Creating new repo at {new_repo}")
-    new_repo.mkdir(parents=True, exist_ok=True)
+    new_repo.mkdir(parents=True)  # fail if it already exists somehow
     subprocess.run(["git", "init", str(new_repo)], check=True)
     pick_result = Pick.Result(path=new_repo.as_posix())
 
