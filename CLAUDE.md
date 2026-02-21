@@ -96,6 +96,27 @@ All handlers use `logger = logging.getLogger(__name__)`. Scaf exposes log output
 - **Prefer proxied wsl calls over bash scripts in Python subprocess.** Passing bash scripts via `-c`/`-s` through Python subprocess on Windows causes subtle bugs: wsl.exe mangles `$(...)` substitutions, Python `text=True` converts `\n`→`\r\n` breaking bash parsing. Instead, chain direct commands: `["wsl", "-d", distro, "--", "find", ...]`. Each call costs ~80ms warm; for typical use (≤2 projects/distro) this is faster than one bash -s call.
 - In `wsl/find`, `wsl/path/get` converts the origin to a WSL path first, then per-distro checks use plain proxied calls: `bash -c 'echo $HOME'`, `find $HOME/projects`, `git -C <dir> remote -v`.
 
+#### Rebuilding the base WSL image
+
+The current base is `C:/wsl-images/ubuntu24-py314.tar` (Ubuntu 24.04, Python 3.14.3). To rebuild:
+
+```bash
+# Import an existing image as a build distro
+wsl --import ubuntu24-build C:/wsl/ubuntu24-build C:/wsl-images/<source>.tar
+
+# Make changes, e.g. to upgrade Python:
+#   apt-get update && add-apt-repository ppa:deadsnakes/ppa
+#   apt-get install -y python3.X python3.X-venv python3-pip
+#   update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.X 2
+#   update-alternatives --install /usr/bin/python  python  /usr/bin/python3.X 1
+#   python3.X -m ensurepip
+#   echo -e '[global]\nroot-user-action = ignore' > /etc/pip.conf
+
+# Export and clean up
+scaf call wsl/export ubuntu24-build --name ubuntu24-py3XX
+scaf call wsl/nuke ubuntu24-build --force
+```
+
 ## Dotfiles
 
 `dotfiles/install.sh` copies git and tmux configs into `~`. After running it, set the email address in `~/.gitconfig` for company environments.
