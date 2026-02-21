@@ -98,7 +98,7 @@ All handlers use `logger = logging.getLogger(__name__)`. Scaf exposes log output
 
 #### Rebuilding the base WSL image
 
-The current base is `C:/wsl-images/ubuntu24-py314.tar` (Ubuntu 24.04, Python 3.14.3). To rebuild:
+The current base is `C:/wsl-images/ubuntu24-py314.tar` (Ubuntu 24.04, Python 3.14.3, Node 18, Claude Code). To rebuild:
 
 ```bash
 # Import an existing image as a build distro
